@@ -1,0 +1,72 @@
+http://codeforces.com/contest/377/problem/C
+
+修改为总分是乘积，求比值最大
+
+/*************************************************************************
+    > File Name: c.cpp
+    > Author: implus
+    > Mail: 674592809@qq.com
+    > Created Time: 一 12/30 01:29:04 2013
+ ************************************************************************/
+
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<vector>
+#include<algorithm>
+#include<cmath>
+#include<map>
+#include<string>
+#include<set>
+#include<queue>
+#include<stack>
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+#define ls (rt<<1)
+#define rs (rt<<1|1)
+#define lson l,m,ls
+#define rson m+1,r,rs
+const int inf = (1<<30);
+double dp[1<<21][21];
+double a[111];
+int n,m;
+char ch[22];
+int who[22];
+
+// dp[s][p]    先手/ 后手的最大数值
+double gao(int s,int p){
+  double & t = dp[s][p];
+  if(t != -inf)return t;
+  if(p == m)return t = 1;
+  
+  double v = 1;
+  for(int i = 0; i < m; i ++)if((1<<i) & s){
+    int ns = s ^ (1<<i);
+    if(ch[p] == 'p')v = a[i];
+    if(who[p+1] == who[p]) t = max(t, v * gao(ns,p + 1));
+    else t = max(t, v / gao(ns, p + 1));
+  }
+  return t;
+}
+int main(){
+  while(cin>>n){
+    for(int i = 0; i < n; i++){
+      cin>>a[i];
+    }
+    sort(a,a + n);
+    reverse(a,a + n);
+
+    cin>>m;
+    for(int i = 0; i < m; i++){
+      cin>>ch[i]>>who[i];
+    }
+    fill(dp[0],dp[1<<m],-inf);   
+    double t = gao((1<<m) - 1,0);
+    if(who[0] == 2)t = 1/t;
+    cout<<t<<endl;
+  }
+  return 0;
+}
+
