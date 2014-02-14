@@ -20,12 +20,13 @@
 #include<limits>
 using namespace std;
 typedef long long ll;
-typedef pair<int,int> pii;
+typedef pair<int,int> PIi;
 #define ls (rt<<1)
 #define rs (rt<<1|1)
 #define lson l,m,ls
 #define rson m+1,r,rs
 const double eps = 1e-8;
+const double PI = acos(-1.0);
 int dcmp(double x){
   return (x > eps) - (x < -eps);
 }
@@ -215,23 +216,62 @@ bool Rat_LineDistance3D(const Point3& p1, const Vector3& u, const Point3& p2, co
   return true;
 }
 
+
+// *** Spherical cosine rules:
+// cosc = cosa*cosb + sina*sinb*cosC
+// E = A + B + C - PI = 4 * PI * AreaOfTriangle / AreaOfSphere
+// tan(E/2) = (tan(a/2)*tan(b/2)*sinC) / (1 + tan(a/2)*tan(b/2)*cosC);
+double Area(Point3 o, double R, Point3 p){
+  return 2*PI*R*R*(1 - R/(p - o).Len());
+}
+double gao(Point3 o, double R, Point3 A, Point3 B){
+  double a = acos(R / (A - o).Len());
+  double c = acos(R / (B - o).Len());
+  Point3 nA = o + (A - o)/(A - o).Len()*R,
+         nB = o + (B - o)/(B - o).Len()*R;
+  double l = (nA - nB).Len();
+  double b = acos((2*R*R - l*l) / (2*R*R));
+  double C = (cos(c) - cos(a)*cos(b)) / (sin(a)*sin(b));
+  C = acos(C);
+  C = 2*C;
+  double E = (tan(a/2)*tan(a/2)*sin(C)) / (1 + tan(a/2)*tan(a/2)*cos(C));
+  E = atan(E);
+  E = 2*E;
+  double tri = E*R*R;
+  double shan = Area(o, R, A) * C / (2*PI);
+  return shan - tri;
+}
+
+
 //UVA 11275 test, TriTriIntersection, TriSegIntersection, PointInTri
 //hdu 4714 test, LineDistance3D
 int main(){
-  int T;
+  int T, icase = 1;
   scanf("%d",&T);
-  Point3 p[4];
+  Point3 A, B; Point3 o(0, 0, 0);double R;
   while(T--){
-    for(int i = 0; i < 4; i++) p[i].read();
-    double s, t;
-    Rat_LineDistance3D(p[0], p[1] - p[0], p[2], p[3] - p[2], s);
-    Point3 p1 = p[0] + (p[1] - p[0])*s;
+    scanf("%lf", &R);
+    A.read(); B.read();
+    double s1 = Area(o, R, A), s2 = Area(o, R, B);
+    double ans;
 
-    Rat_LineDistance3D(p[2], p[3] - p[2], p[0], p[1] - p[0], t);
-    Point3 p2 = p[2] + (p[3] - p[2])*t;
-
-    printf("%.6f\n",(p1 - p2).Len());
-    printf("%.6f %.6f %.6f %.6f %.6f %.6f\n",p1.x, p1.y, p1.z, p2.x, p2.y, p2.z);
+    Point3 nA = o + (A - o)/(A - o).Len()*R,
+           nB = o + (B - o)/(B - o).Len()*R;
+    double a = acos(R / (A - o).Len()),
+           b = acos(R / (B - o).Len()),
+           l = (nA - nB).Len(),
+           c = acos((2*R*R - l*l) / (2*R*R));
+    double aR = a*R, bR = b*R, dist = c*R;
+    if(dcmp(dist - aR - bR) >= 0) {
+      ans = s1 + s2;
+    }else if(dcmp(dist + aR - bR) <= 0 || dcmp(dist + bR - aR) <= 0){
+      ans = max(s1, s2);
+    }else {
+      double add1 = gao(o, R, A, B), add2 = gao(o, R, B, A);
+      ans = s1 + s2;
+      ans -= add1 + add2;
+    }
+    printf("Case #%d: %.5lf%%\n", icase++, ans*100/(4*PI*R*R));
   }
   return 0;
 }
