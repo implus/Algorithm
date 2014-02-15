@@ -218,6 +218,7 @@ bool Rat_LineDistance3D(const Point3& p1, const Vector3& u, const Point3& p2, co
 
 
 // *** Spherical cosine rules:
+// http://en.wikipedia.org/wiki/Spherical_trigonometry
 // cosc = cosa*cosb + sina*sinb*cosC
 // E = A + B + C - PI = 4 * PI * AreaOfTriangle / AreaOfSphere
 // tan(E/2) = (tan(a/2)*tan(b/2)*sinC) / (1 + tan(a/2)*tan(b/2)*cosC);

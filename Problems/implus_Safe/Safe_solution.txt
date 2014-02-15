@@ -1,0 +1,3 @@
+球体上，3个圆面积的并减去3个圆面积的交
+利用荣耻原理，转化为求两个圆面积的交 ＝ 球面扇形 － 球面三角形
+利用球面cos定理和三角形公式即可得到，参考http://en.wikipedia.org/wiki/Spherical_trigonometry
