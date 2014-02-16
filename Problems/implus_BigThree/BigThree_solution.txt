@@ -1,0 +1,12 @@
+http://codeforces.com/contest/265/problem/E
+改为距离差为1之内,这样的话要维护前4大～
+
+维护a  b  c
+使得最大的3个为：v [ a ] >= v [ b ] >= v [ c ], 变化的过程中，v的数值不减
+
+new t, v [ t ]
+
+if( t in a,b,c ) sort(a,b,c,cmpv);
+else for x in a,b,c
+     if( v [ t ] > v [ x ] )swap(x,t); 
+
