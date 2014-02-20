@@ -34,17 +34,20 @@ const double eps = 1e-8;
 inline int dcmp(double x){
   return (x > eps) - (x < -eps);
 }
+
 struct Point{
   double x,y;
   Point(double x=0, double y=0):x(x),y(y){}
+
   Point operator+(const Point& p)const{ return Point(x + p.x,y + p.y);}
   Point operator-(const Point& p)const{ return Point(x - p.x,y - p.y);}
   Point operator*(const double& p)const{ return Point(x*p,y*p);}
+  Point operator/(const double& p)const{ return Point(x/p,y/p);}
+
   double operator*(const Point& p)const{ return x*p.x + y*p.y;}//dot, v=a*b*cos(c)
   double operator^(const Point& p)const{ return x*p.y - y*p.x;}//x, abs=a*b*sin(c) 
   // a,b quadrangle_area = |a^b|
   // 3D: a,b,c parallelepiped_volume = a^b*c
-  Point operator/(const double& p)const{ return Point(x/p,y/p);}
   Point Rotate(double rad){
     return Point(x*cos(rad) - y*sin(rad),x*sin(rad) + y*cos(rad));
   }
@@ -61,7 +64,9 @@ struct Point{
   void read(){ scanf("%lf%lf",&x,&y); }
   void out(){ printf("%lf %lf ",x,y); }
 };
+
 typedef Point Vector;
+
 struct Line;
 double angle(Vector v){ return atan2(v.y, v.x); }
 double Angle(Vector A, Vector B){ return acos((A*B)/A.Len()/B.Len()); }
