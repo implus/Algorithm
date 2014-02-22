@@ -46,6 +46,7 @@ struct Point{
 
   double operator*(const Point& p)const{ return x*p.x + y*p.y;}//dot, v=a*b*cos(c)
   double operator^(const Point& p)const{ return x*p.y - y*p.x;}//x, abs=a*b*sin(c) 
+
   // a,b quadrangle_area = |a^b|
   // 3D: a,b,c parallelepiped_volume = a^b*c
   Point Rotate(double rad){
@@ -53,8 +54,8 @@ struct Point{
   }
   Point Normal(){ double l = Len(); return Point(-y/l,x/l); }
   Point One(){ double l = Len(); return Point(x/l,y/l); }
+
   double Len(){ return sqrt((*this)*(*this));}
-  double Area2(Point A,Point B,Point C){ return fabs((B-A)^(C-A));}
   bool operator < (const Point& p)const{
     return dcmp(x - p.x) < 0 || (dcmp(x - p.x) == 0 && dcmp(y - p.y) < 0);
   }
@@ -99,6 +100,7 @@ bool IntersectionSegmentSegment(Point a1, Point a2, Point b1, Point b2, int Cont
 }
 
 
+double Area2(Point A,Point B,Point C){ return fabs((B-A)^(C-A));}
 double Area(vector<Point> p, int Direction = 0){// anticlockwise
   double ans = 0; int n = p.size();
   for(int i = 1; i < n-1; i++)
@@ -111,6 +113,7 @@ struct Line{
   double ang;
   Line(){}
   Line(Point P,Vector v):P(P),v(v){ ang = atan2(v.y, v.x); }
+
   bool operator<(const Line& L)const{
     return ang < L.ang;
   }
@@ -146,10 +149,12 @@ bool IntersectionSegmentSegment(Line A, Line B, int type = 0){
   return IntersectionSegmentSegment(A.P, A.P + A.v, B.P, B.P + B.v, type);
 }
 
+
+
 Point IntersectionLineLine(Line A, Line B){
   return IntersectionLineLine(A.P, A.v, B.P, B.v);
 }
-int HalfplaneIntersection(vector<Line>& L, vector<Point>& P){
+int HalfplaneIntersection(vector<Line> L, vector<Point>& P){
   //sort(L.begin(), L.end());
   int l = 0, r = 0, n = L.size();
   vector<Point> p(n);
@@ -174,8 +179,6 @@ int HalfplaneIntersection(vector<Line>& L, vector<Point>& P){
   for(int i = l; i < r; i++) P.push_back(p[i]);
   return r - l;
 }
-
-
 
 #define C_out_me 0
 #define C_in_me 1
@@ -664,6 +667,10 @@ void build_graph(Point* P,int n){
 
 
 
+const int maxn = 100000;
+int C, N, M;
+Point p[maxn];
+Polygon ct[maxn];
 int main() {
   int n;
   ios_base::sync_with_stdio(false);
