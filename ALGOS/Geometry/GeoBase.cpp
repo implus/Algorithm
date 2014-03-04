@@ -180,6 +180,8 @@ int HalfplaneIntersection(vector<Line> L, vector<Point>& P){
   return r - l;
 }
 
+
+
 #define C_out_me 0
 #define C_in_me 1
 #define me_in_C -1
@@ -255,59 +257,91 @@ struct Event{
   Event(){}
   Event(double a,int t):a(a),t(t){}
   bool operator<(const Event& e)const{
-    return dcmp(a - e.a) < 0 || (dcmp(a - e.a) == 0 && t < e.t);
+    return dcmp(a - e.a) < 0 || (dcmp(a - e.a) == 0 && t > e.t);
   }
 };
 void Moderate(double & a){ if(a < 0) a += 2*PI; else if(a > 2*PI) a -= 2*PI; }
-double UnionCircles(vector<Circle> v){
+void UnionCircles(vector<Circle> v){
   sort(v.begin(), v.end());
   v.erase(unique(v.begin(), v.end()), v.end());
-  double s = 0;
-
-  vector<Circle> nv;
+  vector<double> s(v.size() + 1, 0);
+//if just union all then erase the redundance to save time if necessary:
+/*  vector<Circle> nv;
   for(int i = 0; i < v.size(); i++){
     bool ok = 1;
     for(int j = 0; j < v.size(); j++)if(i ^ j)
-      if(v[i].Relation(v[j]) == me_in_C){
+      if(dcmp((v[i].c - v[j].c).Len() + v[i].r - v[j].r) <= 0){
         ok = 0; break;
       }
     if(ok) nv.push_back(v[i]);
   }
   v.swap(nv);
+*/
+  vector<Point> vp;
   for(int i = 0; i < v.size(); i++){
     int cnt = 0;
     vector<Event> ve;
     ve.push_back(Event(0, 1));
     ve.push_back(Event(2*PI, -1));
     for(int j = 0; j < v.size(); j++)if(i ^ j){
-      if(v[i].Relation(v[j])== has_2_intersections){
-        Circle C1 = v[i], C2 = v[j];
-        Vector L = C2.c - C1.c;
-        double d = L.Len(), a = atan2(L.y, L.x); Moderate(a);
-        double da = acos((C1.r*C1.r + d*d - C2.r*C2.r) / (2*C1.r*d));
-        double a1 = a - da; Moderate(a1);
-        double a2 = a + da; Moderate(a2);
-        if(dcmp(a1 - a2) > 0) cnt++;
-        ve.push_back(Event(a1, 1)), ve.push_back(Event(a2, -1));
+      double dis = (v[i].c - v[j].c).Len();
+      if(dcmp(dis - v[i].r - v[j].r) > 0) continue;//  exactly out
+      if(dcmp(dis + v[i].r - v[j].r) <= 0){
+        ve.push_back(Event(0, 1)); ve.push_back(Event(2*PI, -1)); continue;// me in another circle, cover me all
       }
+      if(dcmp(dis + v[j].r - v[i].r) <= 0) continue;// another circle in me, no need
+      Circle C1 = v[i], C2 = v[j];
+      Vector L = C2.c - C1.c;
+      double d = L.Len(), a = atan2(L.y, L.x); Moderate(a);
+      double da = (C1.r*C1.r + d*d - C2.r*C2.r) / (2*C1.r*d); da = acos(da);
+      double a1 = a - da; Moderate(a1);
+      double a2 = a + da; Moderate(a2);
+      if(dcmp(a1 - a2) > 0) cnt++;
+      ve.push_back(Event(a1, 1)), ve.push_back(Event(a2, -1));
     }
 
     sort(ve.begin(), ve.end());
     double l = 0, r, R = v[i].r;  
     for(int j = 0; j < ve.size(); j++){
       r = ve[j].a;
-      if(cnt == 1) {
+      if(cnt == 1)
+      {
         double ang = r - l;
-        Point p1 = v[i].point(l), p2 = v[i].point(r);
-        s += R * R * (ang - sin(ang));
-        s += p1 ^ p2;
+        Point p1 = v[i].point(l), p2 = v[i].point(r); vp.push_back(p1), vp.push_back(p2);
+        s[cnt] += R * R * (ang - sin(ang));
+        s[cnt] += p1 ^ p2;
       }
       l = r;
       cnt += ve[j].t;
     }
   }
-  return s * 0.5;
+// union of all circles 
+  printf("%.5lf\n", s[1] / 2);
+
+// k times cover, not to erase circles
+  /*for(int i = 1; i < s.size(); i++){
+    if(i < s.size() - 1) s[i] = s[i] - s[i + 1];
+    printf("[%d] = %.3lf\n", i, s[i] / 2);
+  }*/
+
+//intersection of all circles
+/*  if(dcmp(s[v.size()]) > 0) printf("The total possible area is %.2lf.\n", s[v.size()] * 0.5);
+  else {
+    bool check = 0;
+    Point ansp;
+    for(int i = 0; i < vp.size(); i++){
+      Point t = vp[i];
+      bool ok = 1;
+      for(int j = 0; j < v.size(); j++) if(dcmp((t - v[j].c).Len() - v[j].r) > 0){
+        ok = 0; break;
+      }
+      if(ok) ansp = t, check = 1;
+    }
+    if(!check) printf("Poor iSea, maybe 2012 is coming!\n");
+    else printf("Only the point (%.2lf, %.2lf) is for victory.\n", ansp.x + eps, ansp.y + eps);
+  }*/
 }
+
 
 // return the number of tangents, 0,1,2,3,4,inf possible, Points is tangents of Circles
 int TangentCircleCircle(Circle A, Circle B, Point* a, Point* b){
@@ -345,6 +379,7 @@ struct Polygon{
   Polygon(vector<Point> v):v(v){}
   Polygon(int n){v.resize(n);}
   Point& operator[](int x){ return v[x];}
+
   int size()const{ return v.size();}
   void push_back(Point p){ v.push_back(p); }
 
@@ -386,6 +421,7 @@ struct Polygon{
     if(n > 1) p.pop_back();
     return p;
   }
+
   /*
   // leftmost x, rightmost y, (x) + QuickHull(x,y,S1) + (y) + QuickHull(y,x,S2)
   // S1 upper xy points, S2 lower xy points
@@ -412,7 +448,7 @@ struct Polygon{
   ans.insert(ans.end(),t.begin(),t.end());
   return ans;
   }
-   */
+  */
   // erase the redundant points, (anticlockwised)
   void Simplify(){
     //v.erase(unique(v.begin(), v.end()), v.end());
@@ -430,12 +466,9 @@ struct Polygon{
 
 bool _IntersectionConvexHullConvexHull(Polygon& P, Polygon& Q){
   int i, j, n = P.size(), m = Q.size();
-  if(m > 1)for(i = 0; i < n; i++){
-    if(Q.Contain(P[i])) return true;
-  }
+  if(m > 1) for(i = 0; i < n; i++) if(Q.Contain(P[i])) return true;
   if(n > 1 && m > 1) for(i = 0; i < n; i++) for(j = 0; j < m; j++)
-    if(IntersectionSegmentSegment(P[i], P[(i + 1)%n], Q[j], Q[(j + 1)%m], 1))
-      return true;
+    if(IntersectionSegmentSegment(P[i], P[(i + 1)%n], Q[j], Q[(j + 1)%m], 1)) return true;
   return false;
 }
 bool IntersectionConvexHullConvexHull(Polygon& P, Polygon& Q){
@@ -474,9 +507,10 @@ bool IntersectionConvexHullConvexHull(Polygon& P, Polygon& Q){
    return ans;
    }
  */
+
 double RotateCaliperConvexHull(Polygon& P, Polygon& Q){
   int n = P.size(), m = Q.size(), j = 0, nj, i = 0, ni, k;
-  for(k = 0; k < m; k++)if(dcmp(Q[k].x - Q[j].x) >= 0) j = k;
+  for(k = 0; k < m; k++) if(dcmp(Q[k].x - Q[j].x) >= 0) j = k;
   double ans = 1e99;
   for(i = 0; i < n; i++){
     ni = (i + 1)%n;
@@ -491,15 +525,14 @@ double RotateCaliperConvexHull(Polygon& P, Polygon& Q){
   return ans;
 }
 
+
+
 bool _ApartConvexHullConvexHull(Polygon& P, Polygon& Q){
   int n = P.size(), m = Q.size(), j = 0, nj, i = 0, ni, k;
-  for(k = 0; k < m; k++)if(dcmp(Q[k].x - Q[j].x) >= 0) j = k;
-  if(n == 1){
-    if(m <= 1) return true;
-    for(j = 0; j < m; j++){  
-      nj = (j + 1)%m;
-      if(dcmp((Q[nj] - Q[j]) ^ (P[0] - Q[j])) < 0) return true;
-    }
+  for(k = 0; k < m; k++) if(dcmp(Q[k].x - Q[j].x) >= 0) j = k;
+  if(n == 1){ 
+    if(m == 1) return !(P[0] == Q[0]);
+    return !Q.Contain(P[0]);
   }
   for(i = 0; i < n; i++){
     ni = (i + 1)%n;
@@ -561,7 +594,6 @@ struct PSLG{
     G[to].push_back(m - 1);
   }
 
-  //static bool angcmp(int a, int b){ return edges[a].ang < edges[b].ang; }
   // find faces and cal area
   void Build(){
     for(int u = 0; u < n; u++){
@@ -594,7 +626,7 @@ struct PSLG{
         }
       }
     for(int i = 0; i < faces.size(); i++){
-      area[i] = Area(faces[i].v,1);
+      area[i] = Area(faces[i].v, 1);
     }
   }
 };
@@ -665,27 +697,31 @@ void build_graph(Point* P,int n){
 
 }
 
+double F(double x){ return x * x; }
+double simpson(double a, double b){
+  double c = (a + b) / 2;
+  return (F(a) + 4*F(b) + F(c)) * (b - a) / 6;
+}
+double asr(double a, double b, double eps, double A){
+  double c = (a + b) / 2;
+  double L = simpson(a, c), R = simpson(c, b);
+  if(fabs(L + R - A) <= 15 * eps) return L + R + (L + R - A) / 15;
+  return asr(a, c, eps / 2, L) + asr(c, b, eps / 2, R);
+}
+double asr(double a, double b, double eps){
+  return asr(a, b, eps, simpson(a, b));
+}
 
 
-const int maxn = 100000;
-int C, N, M;
-Point p[maxn];
-Polygon ct[maxn];
 int main() {
   int n;
-  ios_base::sync_with_stdio(false);
-  int T;
-  cin>>T;
-  while(T--){
-    cin>>C>>N;
-    for(int i = 0; i < N; i++) p[i].read();
-    for(int c = 0; c < C; c++){
-      cin>>M; ct[c].v.resize(M);
-      for(int i = 0; i < M; i++) ct[c][i].read();
-    }
-
+  while(cin>>n){
+    vector<Circle> v(n);
+    for(int i = 0; i < n; i++) v[i].c.read(), cin>>v[i].r;
+    UnionCircles(v);
   }
   return 0;
 }
+
 
 
