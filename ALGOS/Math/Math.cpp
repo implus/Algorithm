@@ -57,3 +57,33 @@ bool miller_rabin(ll n) {
 	return true;
 }
 
+const int maxn = 111111;
+int eular[maxn], //eular function
+    prime[maxn], tot, //prime list
+    f[maxn], //flag == 0 is prime
+    mu[maxn];//mobiwusi value
+vector<int> v[maxn], // v为约数，含1,n； 
+            vp[maxn];// vp为素因子，不含1
+void init(){
+  eular[1] = 1;  tot = 0;
+  fill(mu, mu + maxn, 1);
+  for(int i = 2; i < maxn; i++) {
+    mu[i] = -mu[i];
+    v[i].push_back(i);v[i].push_back(1);
+    for(int j = i + i; j < maxn; j += i){
+      mu[j] += mu[i];
+      v[j].push_back(i);
+    }
+    if(f[i] == 0){
+      vp[i].push_back(i); prime[tot++] = i;
+      eular[i] = i - 1;
+      for(int j = i + i; j < maxn; j += i){
+        f[j] = 1;
+        vp[j].push_back(i);
+        if(eular[j] == 0) eular[j] = j;
+        eular[j] = eular[j] / i * (i - 1);
+      }
+    }
+  }
+}
+

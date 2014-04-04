@@ -1,0 +1,73 @@
+//http://acm.fzu.edu.cn/problem.php?pid=1074
+
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cstring>
+#include<vector>
+#include<algorithm>
+#include<cmath>
+#include<map>
+#include<string>
+#include<set>
+#include<queue>
+#include<stack>
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> pii;
+#define ls (rt<<1)
+#define rs (rt<<1|1)
+#define lson l,m,ls
+#define rson m+1,r,rs
+
+int m, T;
+ll k;
+ll dp[22][11][2];
+int bit[22];
+ll gao(int len, int num, bool zero, bool limits){
+  if(num < 0) return 0;
+  if(len == -1){
+    return  num == 0;
+  }
+  ll& ans = dp[len][num][zero];
+  if(!limits && ans != -1) return ans;
+  ll ret = 0;
+  int up = limits? bit[len]: 9;
+  for(int i = 0; i <= up; i++){
+    if(i == 0)
+      ret += gao(len - 1, num - (zero == 0), zero, limits && (i == up));
+    else 
+      ret += gao(len - 1, num, 0, limits && (i == up));
+  }
+  if(!limits) ans = ret;
+  return ret;
+}
+ll gao(ll x){
+  int c = 0;
+  while(x){
+    bit[c++] = x % 10;
+    x /= 10;
+  }
+  return gao(c - 1, m, 1, 1);
+}
+int main(){
+  memset(dp, -1, sizeof(dp));
+  cin>>T;
+  {
+    while(T--){
+      cin>>m>>k;
+      ll l = 0, r = numeric_limits<ll>::max();
+      while(r - l > 1){
+        ll mid = (l + r) >> 1;
+        if(gao(mid) < k) l = mid;
+        else r = mid;
+      }
+      cerr<<r<<endl;
+      ll n = r, len = 0, x;
+      while(n){ len++; x = n % 10; n /= 10;}
+      cout<<len<<" "<<x<<endl;
+    }
+  }
+  return 0;
+}
+
