@@ -70,7 +70,7 @@ struct Dinic{
   }
   int dfs(int x, int a){
     if(x == t || a == 0) return a;
-    int flow = 0, f;
+    int flow = 0, f = 0;
     for(int& i = cur[x]; i < G[x].size(); i++){
       Edge& e = edges[G[x][i]];
       if(d[e.to] == d[x] + 1 && (f = dfs(e.to, min(a, e.cap - e.flow))) > 0){
