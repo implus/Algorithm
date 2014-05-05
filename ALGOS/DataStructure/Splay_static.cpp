@@ -92,6 +92,21 @@ struct Splay {
     up(x), up(y);
     x = y;
   }
+  /*
+  void splay(int& x, int k){
+    down(x);
+    if(sz[ls] == k) return;
+    int d = (sz[ls] < k); k -= d * (sz[ls] + 1);
+    
+    down(son[x][d]);
+    int xl = sz[son[son[x][d]][0]];
+    if(xl != k){
+      int y = (xl < k); k -= y * (xl + 1);
+      splay(son[son[x][d]][y], k);
+      if(y == d) rotate(x, d ^ 1); else rotate(son[x][d], y ^ 1);
+    }
+    rotate(x, d ^ 1);
+  }*/
   void splay(int& x, int k) {
     down(x);
     if(sz[ls] == k) return;
