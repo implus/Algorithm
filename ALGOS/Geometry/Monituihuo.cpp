@@ -26,14 +26,6 @@ typedef pair<int,int> pii;
 #define rson m+1,r,rs
 //source here 
  
- 
-#include<iostream> 
-#include<cstdlib> 
-#include<cstring> 
-#include<cstdio> 
-#include<cmath> 
- 
-using namespace std; 
 int n; 
 struct node{ 
 	double  x,y,z; 
@@ -89,19 +81,22 @@ int main(){
 								B = newB; 
 								C = newC; 
 								best = dis; 
+								/*
 								if(best>=0.000001){ 
 									ok = true; 
 								}								 
+								*/
 							} 
 						} 
  
 					} 
 				} 
 			} 
+			cerr<<"best = "<<best<<endl;
 			step /=2; 
 			//cout<<step<<endl; 
 		} 
-		//printf("%.6lf\n",best); 
+		printf("%.6lf\n",best); 
 		//printf("%.6lf\n",getDist(1,0,0)); 
 		printf("Case %d: %.6lf %.6lf %.6lf\n",++cas,A,B,C); 
 	} 

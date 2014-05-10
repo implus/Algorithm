@@ -1,8 +1,8 @@
 /*************************************************************************
-    > File Name: Dinic.cpp
-    > Author: implus
-    > Mail: 674592809@qq.com
-    > Created Time: 五  4/ 4 10:43:56 2014
+  > File Name: Dinic.cpp
+  > Author: implus
+  > Mail: 674592809@qq.com
+  > Created Fime: 五  4/ 4 10:43:56 2014
  ************************************************************************/
 
 #include<iostream>
@@ -21,109 +21,100 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> pii;
 
-const int  maxn = 555;
-const int  maxm = 555;
-const int inf = (1<<30);
-
-struct Dinic{
-  int n, m, s, t;
+const int FINF = 1<<30;
+const int CINF = 1<<30;
+template<class F = int, class C = int>// F is flow, C is cost
+struct Flow{
   struct Edge{
-    int from, to, cap, flow, cost;
-    Edge(){} Edge(int from, int to, int cap, int flow, int cost):from(from), to(to), cap(cap), flow(flow), cost(cost){}
+    int from, to, cap; F flow; C cost; int next;
+    Edge(){} Edge(int from, int to, int cap, F flow, F cost, int next):
+    from(from), to(to), cap(cap), flow(flow), cost(cost), next(next){}
   };
-  vector<Edge> edges;
-  vector<int> G[maxn];
-  bool vis[maxn];
-  int d[maxn];
-  int cur[maxn];// current edge
-  //MCMF
-  int inq[maxn];
-  int p[maxn];  // last edge
-  int a[maxn];  // min cost flow
+
+  vector<Edge> E;
+  vector<int> head;
+  int n, m;
+
   void init(int n){
-    this->n = n;
-    edges.clear();
-    for(int i = 0; i < n; i++) G[i].clear();
+    this->n = n; head.assign(n + 1, -1);
+    m = 0; E.clear();
   }
-  void add(int u, int v, int f, int cost = 0){
-    //printf("%d -> %d, v = %d\n", u, v, f);
-    edges.push_back(Edge(u, v, f, 0, cost));
-    edges.push_back(Edge(v, u, 0, 0, cost));
-    m = edges.size();
-    G[u].push_back(m - 2);
-    G[v].push_back(m - 1);
+  void add(int s, int t, int f, int c){
+    E.push_back(Edge(s, t, f, 0, c, head[s])); head[s] = m++;
+    E.push_back(Edge(t, s, 0, 0, -c, head[t])); head[t] = m++;
   }
-  bool bfs(){
-    fill(vis, vis + n, 0); fill(d, d + n, 0);
-    vis[s] = 1;            
-    queue<int> q; q.push(s);
-    while(q.size()){
-      int p = q.front(); q.pop();
-      for(int i = 0; i < G[p].size(); i++){
-        Edge e = edges[G[p][i]];
-        if(e.cap - e.flow == 0 || vis[e.to]) continue;
-        vis[e.to] = 1, d[e.to] = d[p] + 1;
-        q.push(e.to);
-      }
-    }
-    return d[t];
-  }
-  int dfs(int x, int a){
-    if(x == t || a == 0) return a;
-    int flow = 0, f = 0;
-    for(int& i = cur[x]; i < G[x].size(); i++){
-      Edge& e = edges[G[x][i]];
-      if(d[e.to] == d[x] + 1 && (f = dfs(e.to, min(a, e.cap - e.flow))) > 0){
-        flow += f; a -= f;
-        e.flow += f, edges[G[x][i]^1].flow -= f;
-        if(a == 0) break;
-      }
-    }
-    return flow;
-  }
-  int maxFlow(int s, int t){
-    this->s = s; this->t = t;
-    int flow = 0;
-    while(bfs()){
-      memset(cur, 0, sizeof(cur));
-      flow += dfs(s, inf);
-    }
-    return flow;
-  }
-// mcmf:
-  bool spfa(int s, int t, int &flow, int &cost){
-    fill(d, d + n, inf);
-    fill(inq, inq + n, 0);
-    d[s] = 0, inq[s] = 1, p[s] = 0, a[s] = inf;
-    queue<int> q;
-    q.push(s);
+
+  vector<int> dp;// steps
+  bool bfs(int s, int t){
+    dp.assign(n + 1, -1); 
+    queue<int> q; q.push(s), dp[s] = 0;
     while(q.size()){
       int u = q.front(); q.pop();
-      for(int i = 0; i < G[u].size(); i++){
-        Edge &e = edges[G[u][i]];
-        if(e.cap - e.flow > 0 && d[e.to] < d[u] + e.cost){
-          d[e.to] = d[u] + e.cost;
-          p[e.to] = G[u][i];
-          a[e.to] = min(a[u], e.cap - e.flow);
-          if(!inq[e.to]) { q.push(e.to), inq[e.to] = 1; }
+      for(int e = head[u]; ~e; e = E[e].next) if( E[e].cap > E[e].flow ){
+        int v = E[e].to;
+        if(dp[v] != -1) continue;
+        dp[v] = dp[u] + 1;
+        q.push(v);
+      }
+    }
+    return dp[t] != -1;
+  }
+  F dfs(int s, int t, F a){
+    if(s == t || a == 0) return a;
+    F ans = 0, f;
+    for(int e = head[s]; ~e; e = E[e].next) if( E[e].cap > E[e].flow ){
+      if(dp[E[e].to] == dp[s] + 1 && (f = dfs(E[e].to, t, min(a, E[e].cap - E[e].flow))) > 0){
+        ans += f; E[e].flow += f; E[e ^ 1].flow -= f; a -= f; if(a == 0) break;
+      }
+    }
+    return ans;
+  }
+  F maxFlow(int s, int t){
+    F flow = 0;
+    while(bfs(s, t)){
+      //cerr<<flow<<endl;
+      flow += dfs(s, t, FINF);
+    }
+    E.clear(); head.clear(); dp.clear();
+    return flow;
+  }
+
+// mcmf
+  vector<C> d; vector<F> a; vector<int> last;
+  bool spfa(int s, int t, F& flow, C& cost){
+    d.assign(n + 1, CINF); last.assign(n + 1, -1); a.assign(n + 1, FINF);
+    queue<int> q; q.push(s), d[s] = 0;
+    while(q.size()){
+      int w = q.front(); q.pop();
+      for(int e = head[w]; ~e; e = E[e].next) if( E[e].cap > E[e].flow ) {
+        if(d[E[e].to] > d[w] + E[e].cost){
+          d[E[e].to] = d[w] + E[e].cost;
+          last[E[e].to] = e;
+          a[E[e].to] = min(a[w], E[e].cap - E[e].flow);
+          q.push(E[e].to);
         }
       }
     }
-    if(d[t] == inf) return false;
+    if(d[t] == CINF) return false;
     flow += a[t];
     cost += a[t] * d[t];
-    int u = t;
-    while(u != s){
-      edges[p[u]].flow += a[t];
-      edges[p[u]^1].flow -= a[t];
-      u = edges[p[u]].from;
+    int e = last[t];
+    while(~e){
+      E[e].flow += a[t]; 
+      E[e ^ 1].flow -= a[t];
+      e = last[E[e].from];
     }
     return true;
   }
-  int Mincost(int s, int t){
-    int flow = 0, cost = 0;
+  C MCMF(int s, int t, F& flow, C& cost){
+    cost = 0; flow = 0;
     while(spfa(s, t, flow, cost));
+    E.clear(); head.clear();d.clear(); last.clear(); a.clear(); // not overstack
     return cost;
   }
-}g;
+};
 
+Flow<int,int> g;
+int main(){
+  return 0;
+}
