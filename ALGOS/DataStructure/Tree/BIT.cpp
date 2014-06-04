@@ -2,7 +2,7 @@
     > File Name: BIT.cpp
     > Author: implus
     > Mail: 674592809@qq.com
-    > Created Time: 六  4/26 13:52:18 2014
+    > Created Time: 三  2/12 14:06:46 2014
  ************************************************************************/
 
 #include<iostream>
@@ -25,16 +25,12 @@ typedef pair<int,int> pii;
 #define lson l,m,ls
 #define rson m+1,r,rs
 
-
-const int maxn = 1e8;
-struct BIT{
-  map<int, ll> b, c;
-  void init(){
-    b.clear(); c.clear();
-  }
-  // sum[r] = b[1] ~ b[r] + c[r]*r
-  // b[p] += v*p
-  // c[1] ~ c[p - 1] += v
+const int maxn = 4e6 + 6;
+struct BIT{// index from 1
+  ll b[maxn], c[maxn];
+  // b -> b[p] += p*v
+  // c -> c[1] ~ c[p-1] += v;
+  // sum[r] = b[1] ~ + b[r] + c[r]*r;
   void add(int p, ll v){
     for(int x = p; x < maxn; x += x&-x) b[x] += v*p;
     for(int x = p - 1; x; x -= x&-x) c[x] += v;
@@ -51,26 +47,4 @@ struct BIT{
   ll sum(int l, int r){
     return sum(r) - ((l > 1) ? sum(l - 1): 0);
   }
-};
-
-/* use:
-when 1<=l<=r
-  .add(l, r, v);
-  .sum(l, r);
-*/
-
-int main(){
-  int n, l, r, x;
-  while(scanf("%d",&n) == 1){
-    lx.init();
-    for(int i = 0; i < n; i++){
-      scanf("%d%d", &l, &r);
-      ll s = lx.sum(l, r);   
-      printf("%lld\n", s);
-      scanf("%d%d%d",&l, &r, &x);
-      lx.add(l + s % 2014, r + s % 2014, (x + s) % 2014);
-    }
-  }
-  return 0;
-}
-
+}lx[2];

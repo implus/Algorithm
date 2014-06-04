@@ -44,13 +44,8 @@ struct Point{
     }
     return Point(v);
   }
-  void out(){
-    for(int i = 0; i < x.size(); i++) cerr<<x[i]<<" "; cerr<<endl;
-  }
 };
 
-
-template<class T = double>
 struct Node{
   Point<T> p;// 分割点
   int k; T v; // 法向量第几维度 和 数值
@@ -70,8 +65,6 @@ bool cmp(Point<> a, Point<> b){
   return a[cmpk] < b[cmpk];
 }
 
-
-
 // E = 0, first
 void build(int& rt, int l, int r, int k){//当前根节点，左区间l，右区间r，选取k维度分割
   if(l > r) return;
@@ -82,11 +75,6 @@ void build(int& rt, int l, int r, int k){//当前根节点，左区间l，右区
   Ne[rt] = Node<double>(lx[m], k, lx[m][k], -1, -1);
   build(Ne[rt].l, l, m - 1, (k + 1) % K);
   build(Ne[rt].r, m + 1, r, (k + 1) % K);
-
-  Ne[rt].p.out();
-  cerr<<"left son = ";Ne[Ne[rt].l].p.out();
-  cerr<<"right son = ";Ne[Ne[rt].r].p.out();
-  cerr<<"---------------------------------"<<endl;
 }
 
 double minv;
@@ -108,10 +96,18 @@ void dfs(int rt, Point<double> p){
   }
   minv = min(minv, (p - Ne[rt].p).Len());
 //输出检查dfs路径
-  Ne[rt].p.out();
-  cerr<<" minv = "<<minv<<endl;
 }
 
+/* use:
+build:
+  K = dim; E = 0;
+  lx = Point<double>(v)[n]
+  build(root, 0, n - 1, 0);
+
+query:
+  minv = 1e99;
+  dfs(root, Point<double>());
+*/
 
 
 double d[6][2] = {2, 3, 5, 4, 9, 6, 4, 7, 8, 1, 7, 2};

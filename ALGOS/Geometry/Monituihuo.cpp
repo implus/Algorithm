@@ -40,8 +40,6 @@ double getDist(double aa,double bb,double cc){
 	for(i=0;i<n;i++){ 
 		sum += dist(dot[i],aa,bb,cc); 
 	} 
-	//cout<<sum<<endl; 
-	//getchar(); 
 	return sum; 
 } 
 int main(){ 
@@ -92,9 +90,7 @@ int main(){
 					} 
 				} 
 			} 
-			cerr<<"best = "<<best<<endl;
 			step /=2; 
-			//cout<<step<<endl; 
 		} 
 		printf("%.6lf\n",best); 
 		//printf("%.6lf\n",getDist(1,0,0)); 
@@ -102,5 +98,4 @@ int main(){
 	} 
 	return 0; 
 } 
-
 
