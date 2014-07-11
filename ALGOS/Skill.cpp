@@ -34,3 +34,5 @@ int main(){
   return 0;
 }
 
+
+#pragma comment(linker,"/STACK:102400000,102400000")//手动扩栈
