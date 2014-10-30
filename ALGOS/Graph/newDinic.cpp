@@ -118,6 +118,7 @@ struct NetWork{
     }
 };
 
+
 template<int MAXN, typename T = int, typename S = T>
 struct MinCostMaxFlow {
   struct NegativeCostCircuitExistsException {

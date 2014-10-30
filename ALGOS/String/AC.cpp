@@ -1,30 +1,3 @@
-/*************************************************************************
-    > File Name: AC.cpp
-    > Author: implus
-    > Mail: 674592809@qq.com
-    > Created Time: 二  7/ 1 09:19:29 2014
- ************************************************************************/
-
-#include<iostream>
-#include<cstdio>
-#include<cstdlib>
-#include<cstring>
-#include<vector>
-#include<algorithm>
-#include<cmath>
-#include<map>
-#include<string>
-#include<set>
-#include<queue>
-#include<stack>
-using namespace std;
-typedef long long ll;
-typedef pair<int,int> pii;
-#define ls (rt<<1)
-#define rs (rt<<1|1)
-#define lson l,m,ls
-#define rson m+1,r,rs
-
 /*
 0.	基本注意点：
 1）  val 数组记录了当前的状态对应的哪个给定串，val == 0 代表没有给定串对应，为了方便表示，所以加入串的时候第一个串就用1代表。
@@ -91,12 +64,24 @@ struct AC{
 				}else{
 					*e++ = u;
 					f[u] = ch[f[r]][c];
-					//val[u] |= val[f[u]];// 2进制 若单词少（<12，可状态压缩）					last[u] = val[f[u]] ? f[u] : last[f[u]];// val > 0 代表单词节点 ，所以单词列表下标从1开始
+					//val[u] |= val[f[u]];// 2进制 若单词少（<12，可状态压缩）				
+					//last[u] = val[f[u]] ? f[u] : last[f[u]];// val > 0 代表单词节点 ，所以单词列表下标从1开始
 				}
 			}
 		}
 	}
+	/*
+	int gao(int s){
+        int ans =0;
+        while(s){
+            ans = max(dp[s],ans);
+            s = last[s];
+        }
+        return ans;
+    }*/
 	void gao(){
+		//if(val[s])t = max(t,gao(s));
+        //else if(last[s])t = max(t,gao(last[s]));
 	}
 }lx;
 
